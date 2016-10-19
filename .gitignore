@@ -1,0 +1,20 @@
+# Files
+.DS_Store
+db.sqlite3
+*.pyc
+*.json
+*.patch
+.project
+.pydevproject
+
+# Directories
+logs/
+tmp/
+media_cdn/
+static_cdn/
+
+# Linux
+*~
+
+# KDE
+.directory

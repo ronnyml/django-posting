@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load urlify %}
+{% block title%} {{ post.title }} {% endblock %}
+
+{% block content %}
+<div class="col-sm-6 col_sm-offset-3">
+  {% if post.image %}
+  <img src="{{ post.image.url }}" class="img-responsive" />
+  {% endif %}
+  <h1>{{ post.title }} {% if post.draft %}<span style="color:red">Draft</span>{% endif %} <small>{{ post.publish }}</small></h1>
+  
+  {% if post.user.get_full_name %}
+  <p>Author: {{ post.user.get_full_name }}</p>
+  {% endif %}
+
+  <p>
+  <div class="fb-like" data-href="{{ request.build_absolute_uri }}" data-layout="standard" data-action="like" data-size="small" data-show-faces="false" data-share="true">
+  </div>
+  </p>
+
+  <p>
+  <a href="https://twitter.com/home?status={{ post.content|urlify }} {{ request.build_absolute_uri }}">
+  Twitter
+  </a>
+  </p>
+
+  <hr/>
+
+  <div class="row">
+    <div class="col-sm-12">
+      {{ post.content|linebreaks }}
+      <hr/>
+      <div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
