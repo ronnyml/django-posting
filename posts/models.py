@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db import models
@@ -71,7 +72,10 @@ def create_slug(instance, new_slug=None):
     slug = slugify(instance.title)
     if new_slug is not None:
         slug = new_slug
-    qs = Post.objects.filter(slug=slug).order_by('-id')
+    app_name = instance._meta.app_label
+    model_name = instance._meta.object_name
+    Model = apps.get_model('{}.{}'.format(app_name, model_name))
+    qs = Model.objects.filter(slug=slug).order_by('-id')
     exists = qs.exists()
     if exists:
         new_slug = '%s-%s' % (slug, qs.first().id)
