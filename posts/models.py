@@ -5,6 +5,8 @@ from django.db.models.signals import pre_save
 from django.utils import timezone
 from django.utils.text import slugify
 
+from utils.image_thumbs import ImageWithThumbsField
+
 
 def upload_location(instance, filename):
     return '%s/%s' % (instance.id, filename)
@@ -12,6 +14,32 @@ def upload_location(instance, filename):
 class PostManager(models.Manager):
     def get_query_set(self):
         super(PostManager, self).get_query_set().filter(draft=False).filter(publish__lte=timezone.now())
+
+class Category(models.Model):
+    title  = models.CharField(max_length=120)
+    slug = models.SlugField(unique=True, blank=True)
+    image = ImageWithThumbsField(
+        blank=True,
+        upload_to=upload_location,
+        sizes=((300, 200), (200, 130))
+    )
+    status = models.BooleanField(default=True, verbose_name='Active')
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+
+    def thumbnail(self):
+        if self.image != '':
+            image_url = self.image.url_300x200
+            return "<img src='%s' />" % (image_url)
+        else:
+            return ''
+    thumbnail.short_description = 'Image'
+    thumbnail.allow_tags = True
 
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1)
@@ -37,8 +65,7 @@ class Post(models.Model):
         return reverse('posts:detail', kwargs={'slug': self.slug})
 
     class Meta:
-        ordering = ['-created', '-updated']    
-            
+        ordering = ['-created', '-updated']
 
 def create_slug(instance, new_slug=None):
     slug = slugify(instance.title)
@@ -55,4 +82,5 @@ def pre_save_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_slug(instance)
 
+pre_save.connect(pre_save_post_receiver, sender=Category)
 pre_save.connect(pre_save_post_receiver, sender=Post)
