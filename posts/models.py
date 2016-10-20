@@ -25,6 +25,7 @@ class Category(models.Model):
         sizes=((300, 200), (200, 130))
     )
     status = models.BooleanField(default=True, verbose_name='Active')
+    created = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -60,14 +61,26 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True, auto_now_add=False)
     objects = PostManager()
 
+    class Meta:
+        ordering = ['-created', '-updated']
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('posts:detail', kwargs={'slug': self.slug})
 
+class Hashtag(models.Model):
+    name = models.CharField(max_length=50, verbose_name='Hashtag')
+    posts = models.ManyToManyField(Post)
+    categories = models.ManyToManyField(Category, blank=True)
+    date_added = models.DateTimeField(auto_now=False, auto_now_add=True)
+
     class Meta:
-        ordering = ['-created', '-updated']
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 def create_slug(instance, new_slug=None):
     slug = slugify(instance.title)
