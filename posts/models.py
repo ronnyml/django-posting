@@ -44,6 +44,7 @@ class Category(models.Model):
 
 class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1)
+    category = models.ForeignKey(Category)
     title = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
     image = models.ImageField(null=True, blank=True, 
