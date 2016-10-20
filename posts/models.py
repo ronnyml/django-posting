@@ -2,7 +2,7 @@ from django.apps import apps
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -100,5 +100,17 @@ def pre_save_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = create_slug(instance)
 
+def post_save_post_receiver(sender, instance, *args, **kwargs):
+    if instance.content:
+        final_text = ' '.join(instance.content.split())
+        words = final_text.split(' ')
+        for word in words:
+            if word[0] == '#':
+                word = word.replace('#' , '')
+                hashtag, created = Hashtag.objects.get_or_create(name=word)
+                hashtag.posts.add(instance.id)
+                hashtag.categories.add(instance.category.id)
+
 pre_save.connect(pre_save_post_receiver, sender=Category)
 pre_save.connect(pre_save_post_receiver, sender=Post)
+post_save.connect(post_save_post_receiver, sender=Post)
