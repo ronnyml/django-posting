@@ -24,7 +24,7 @@ class Category(models.Model):
         upload_to=upload_location,
         sizes=((300, 200), (200, 130))
     )
-    status = models.BooleanField(default=True, verbose_name='Active')
+    active = models.BooleanField(default=True, verbose_name='Active')
     created = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     class Meta:
