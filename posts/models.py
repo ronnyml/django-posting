@@ -47,11 +47,12 @@ class Post(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, default=1)
     category = models.ForeignKey(Category)
     title = models.CharField(max_length=120)
-    slug = models.SlugField(unique=True)
-    image = models.ImageField(null=True, blank=True, 
+    slug = models.SlugField(unique=True, blank=True)
+    image = ImageWithThumbsField(null=True, blank=True,
             width_field='width', 
             height_field='height',
-            upload_to=upload_location)
+            upload_to=upload_location,
+            sizes=((800, 600), (200, 150)))
     height = models.IntegerField(default=0)
     width = models.IntegerField(default=0)
     content = models.TextField()
