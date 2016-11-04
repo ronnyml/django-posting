@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Post
+from .models import Category, Hashtag, Post
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -18,14 +18,23 @@ class CategoryAdmin(admin.ModelAdmin):
     posts_count.short_description = 'No. Posts'
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'created', 'updated']
+    list_display = [
+        'title', 'hashtags', 'category', 'created', 'draft'
+    ]
     list_display_links = ['created']
     list_editable = ['title']
-    list_filter = ['created', 'updated']
+    list_filter = ['category', 'is_featured', 'created', 'updated']
     search_fields = ['title', 'content']
 
     class Meta:
         model = Post
+
+    def hashtags(self, obj):
+        words = ''
+        for word in Hashtag.objects.filter(posts=obj.id):
+            words += '#' + word.name + ' '
+        return u'<strong>%s</strong>' % words
+    hashtags.allow_tags = True
 
 
 admin.site.register(Category, CategoryAdmin)
