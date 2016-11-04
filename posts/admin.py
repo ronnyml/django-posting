@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 
 from .models import Category, Hashtag, Post
 
@@ -36,6 +37,31 @@ class PostAdmin(admin.ModelAdmin):
         return u'<strong>%s</strong>' % words
     hashtags.allow_tags = True
 
+class HashtagAdmin(admin.ModelAdmin):
+    list_display = [
+        'name', 'hashtags_count', 'related_categories', 'date_added'
+    ]
+    list_filter = (
+        ('categories', admin.RelatedOnlyFieldListFilter),
+    )
+    ordering = ['categories__title', 'name']
+
+    def hashtags_count(self, obj):
+        count = Hashtag.objects.filter(id=obj.id).annotate(Count('posts'))
+        count = count[0].posts__count
+        return count
+    hashtags_count.allow_tags = True
+    hashtags_count.short_description = 'No. Posts'
+
+    def related_categories(self, obj):
+        answers = ''
+        for c in Category.objects.filter(hashtag__id=obj.id).distinct():
+            answers += '-' + c.title + '  '
+
+        return answers
+    related_categories.short_description = 'Categories'
+
 
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(Hashtag, HashtagAdmin)
 admin.site.register(Post, PostAdmin)
